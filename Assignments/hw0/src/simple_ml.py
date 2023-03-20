@@ -81,7 +81,10 @@ def softmax_loss(Z, y):
         Average softmax loss over the sample.
     """
     ### BEGIN YOUR CODE
-    pass
+    #Compute cross-entropy loss
+    loss = -Z[np.arange(len(y)), y] + np.log(np.sum(np.exp(Z), axis=1))
+    #Return average loss over the number of samples
+    return np.sum(loss) / loss.shape[0]
     ### END YOUR CODE
 
 
