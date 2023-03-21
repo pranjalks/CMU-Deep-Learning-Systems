@@ -107,7 +107,14 @@ def softmax_regression_epoch(X, y, theta, lr = 0.1, batch=100):
         None
     """
     ### BEGIN YOUR CODE
-    pass
+    for i in range(0, len(X), batch):
+        Z = np.exp(X[i:i+batch] @ theta)
+        Z_norm = (Z / np.sum(Z, axis=1, keepdims=True))
+        Z_norm[range(len(y[i:i+batch])), y[i:i+batch]] -= 1
+        grad_loss = X[i:i+batch].T @ Z_norm
+        grad_loss /= len(y[i:i+batch])
+        theta -= lr * grad_loss
+
     ### END YOUR CODE
 
 
