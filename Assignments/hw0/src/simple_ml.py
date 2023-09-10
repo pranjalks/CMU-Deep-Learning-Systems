@@ -20,7 +20,9 @@ def add(x, y):
         Sum of x + y
     """
     ### BEGIN YOUR CODE
-    return x+y
+ 
+    return x + y
+ 
     ### END YOUR CODE
 
 
@@ -48,6 +50,7 @@ def parse_mnist(image_filename, label_filename):
                 for MNIST will contain the values 0-9.
     """
     ### BEGIN YOUR CODE
+ 
     #Use 'rb' for reading in binary mode
     with gzip.open(image_filename, 'rb') as file:
         temp, noOfImages, noOfRows, noOfCols = struct.unpack('>IIII', file.read(16))
@@ -62,6 +65,7 @@ def parse_mnist(image_filename, label_filename):
     xmax = np.max(X_read)
     X = (X_read - xmin) / (xmax - xmin)
     return X.astype(np.float32), y
+ 
     ### END YOUR CODE
 
 
@@ -81,10 +85,12 @@ def softmax_loss(Z, y):
         Average softmax loss over the sample.
     """
     ### BEGIN YOUR CODE
+
     #Compute cross-entropy loss
     loss = -Z[np.arange(len(y)), y] + np.log(np.sum(np.exp(Z), axis=1))
     #Return average loss over the number of samples
     return np.sum(loss) / loss.shape[0]
+    
     ### END YOUR CODE
 
 
@@ -107,6 +113,7 @@ def softmax_regression_epoch(X, y, theta, lr = 0.1, batch=100):
         None
     """
     ### BEGIN YOUR CODE
+    
     for i in range(0, len(X), batch):
         Z = np.exp(X[i:i+batch] @ theta)
         Z_norm = (Z / np.sum(Z, axis=1, keepdims=True))
@@ -141,7 +148,24 @@ def nn_epoch(X, y, W1, W2, lr = 0.1, batch=100):
         None
     """
     ### BEGIN YOUR CODE
-    pass
+    
+    for i in range(0, len(X), batch):
+        Z1 = X[i:i+batch] @ W1 # Z1: (num_examples, hidden_dim)
+        Z1[Z1 < 0] = 0
+        temp = np.exp(Z1 @ W2) # temp: (num_examples, num_classes)
+        # G2: (num_examples, num_classes)
+        G2 = (temp / np.sum(temp, axis=1, keepdims=True))
+        G2[range(len(y[i:i+batch])), y[i:i+batch]] -= 1
+        temp = Z1.copy() # temp: (num_examples, hidden_dim)
+        temp[temp > 0] = 1
+        G1 = np.multiply(temp, G2 @ W2.T) # G1: (num_examples, hidden_dim)
+        # deltaW1: (input_dim, hidden_dim)
+        deltaW1 = (1 / batch) * (X[i:i+batch].T @ G1)
+        # deltaW2: (hidden_dim, num_classes)
+        deltaW2 = (1 / batch) * (Z1.T @ G2)
+        W1 -= lr * deltaW1
+        W2 -= lr * deltaW2
+
     ### END YOUR CODE
 
 
