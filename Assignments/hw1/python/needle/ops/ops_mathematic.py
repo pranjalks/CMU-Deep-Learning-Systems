@@ -82,7 +82,8 @@ class PowerScalar(TensorOp):
 
     def gradient(self, out_grad, node):
         ### BEGIN YOUR SOLUTION
-        raise NotImplementedError()
+        return (self.scalar * multiply(out_grad, 
+        power_scalar(node.inputs[0], self.scalar - 1)))
         ### END YOUR SOLUTION
 
 
@@ -121,7 +122,10 @@ class EWiseDiv(TensorOp):
 
     def gradient(self, out_grad, node):
         ### BEGIN YOUR SOLUTION
-        raise NotImplementedError()
+        a, b = node.inputs[0], node.inputs[1]
+        grad_a = out_grad / b
+        grad_b = -out_grad * a / (b ** 2)
+        return grad_a, grad_b
         ### END YOUR SOLUTION
 
 
@@ -140,7 +144,7 @@ class DivScalar(TensorOp):
 
     def gradient(self, out_grad, node):
         ### BEGIN YOUR SOLUTION
-        raise NotImplementedError()
+        return out_grad / self.scalar
         ### END YOUR SOLUTION
 
 
@@ -155,14 +159,17 @@ class Transpose(TensorOp):
     def compute(self, a):
         ### BEGIN YOUR SOLUTION
         if(self.axes):
-          return array_api.swapaxes(a, self.axes[0], self.axes[1])
+            return array_api.swapaxes(a, self.axes[0], self.axes[1])
         else:
-          return array_api.swapaxes(a, -2, -1)
+            return array_api.swapaxes(a, -2, -1)
         ### END YOUR SOLUTION
 
     def gradient(self, out_grad, node):
         ### BEGIN YOUR SOLUTION
-        raise NotImplementedError()
+        if(self.axes):
+            return transpose(out_grad, axes=(self.axes[0], self.axes[1]))
+        else:
+            return transpose(out_grad)
         ### END YOUR SOLUTION
 
 
@@ -181,7 +188,7 @@ class Reshape(TensorOp):
 
     def gradient(self, out_grad, node):
         ### BEGIN YOUR SOLUTION
-        raise NotImplementedError()
+        return transpose(out_grad)
         ### END YOUR SOLUTION
 
 
@@ -235,7 +242,18 @@ class MatMul(TensorOp):
 
     def gradient(self, out_grad, node):
         ### BEGIN YOUR SOLUTION
-        raise NotImplementedError()
+        a, b = node.inputs[0], node.inputs[1]
+        if(len(b.shape) > 2):
+          b_transpose = transpose(b, (b.shape[-2], b.shape[-1]))
+        else:
+          b_transpose = transpose(b)
+        if(len(a.shape) > 2):
+          a_transpose = transpose(a, (a.shape[-2], a.shape[-1]))
+        else:
+          a_transpose = transpose(a)
+        grad_a = matmul(out_grad, b_transpose)
+        grad_b = matmul(a_transpose, out_grad)
+        return grad_a, grad_b
         ### END YOUR SOLUTION
 
 
@@ -251,7 +269,7 @@ class Negate(TensorOp):
 
     def gradient(self, out_grad, node):
         ### BEGIN YOUR SOLUTION
-        raise NotImplementedError()
+        return -out_grad
         ### END YOUR SOLUTION
 
 
